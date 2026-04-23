@@ -1,0 +1,174 @@
+<view class="page">
+  <view class="search-bar bg-white shadow-sm">
+    <view class="search-input flex align-center">
+      <view class="search-icon">
+        <text class="iconfont">🔍</text>
+      </view>
+      <input 
+        class="flex-1" 
+        placeholder="搜索你想要的美食..." 
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearch"
+        confirm-type="search"
+      />
+      <view wx:if="{{keyword}}" class="search-clear" bindtap="onClearSearch">
+        <text>✕</text>
+      </view>
+    </view>
+    <view class="search-btn" bindtap="onSearch">
+      <text>搜索</text>
+    </view>
+  </view>
+
+  <scroll-view class="content" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="section daily-section">
+      <view class="section-header flex justify-between align-center">
+        <view class="section-title">
+          <text class="title-icon">🌟</text>
+          <text class="title-text">每日推荐</text>
+        </view>
+        <view class="section-more" bindtap="goToCategory" data-id="0">
+          <text>更多</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+      
+      <scroll-view class="daily-scroll" scroll-x show-scrollbar="{{false}}">
+        <view class="daily-list flex">
+          <view 
+            class="daily-item" 
+            wx:for="{{dailyRecipes}}" 
+            wx:key="id"
+            bindtap="goToRecipeDetail"
+            data-id="{{item.id}}"
+          >
+            <view class="daily-image">
+              <image src="{{item.image || '/static/images/default-recipe.png'}}" mode="aspectFill" lazy-load />
+              <view class="daily-badge" style="background: {{item.category_color}};">
+                <text>{{item.category_name}}</text>
+              </view>
+            </view>
+            <view class="daily-info">
+              <text class="daily-title line-clamp-1">{{item.title}}</text>
+              <view class="daily-stats flex align-center">
+                <view class="stat-item">
+                  <text class="stat-icon">❤️</text>
+                  <text class="stat-num">{{item.like_count}}</text>
+                </view>
+                <view class="stat-item">
+                  <text class="stat-icon">⭐</text>
+                  <text class="stat-num">{{item.favorite_count}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+          
+          <view class="daily-empty" wx:if="{{dailyRecipes.length === 0}}">
+            <text class="empty-text">暂无推荐菜谱</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="section category-section">
+      <view class="section-header flex justify-between align-center">
+        <view class="section-title">
+          <text class="title-icon">📋</text>
+          <text class="title-text">美食分类</text>
+        </view>
+        <view class="section-more" bindtap="goToCategory" data-id="0">
+          <text>查看全部</text>
+          <text class="arrow">›</text>
+        </view>
+      </view>
+      
+      <view class="category-grid">
+        <view 
+          class="category-item" 
+          wx:for="{{categories.slice(0, 8)}}" 
+          wx:key="id"
+          bindtap="goToCategory"
+          data-id="{{item.id}}"
+        >
+          <view class="category-icon" style="background: {{item.color}}20;">
+            <text style="color: {{item.color}};">🍽️</text>
+          </view>
+          <text class="category-name">{{item.name}}</text>
+          <text class="category-count">{{item.recipe_count}}道菜谱</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section recipe-section">
+      <view class="section-header flex justify-between align-center">
+        <view class="section-title">
+          <text class="title-icon">🔥</text>
+          <text class="title-text">{{keyword ? '搜索结果' : '最新发布'}}</text>
+        </view>
+      </view>
+      
+      <view class="recipe-list">
+        <view 
+          class="recipe-card card" 
+          wx:for="{{recipes}}" 
+          wx:key="id"
+          bindtap="goToRecipeDetail"
+          data-id="{{item.id}}"
+        >
+          <view class="recipe-image">
+            <image src="{{item.image || '/static/images/default-recipe.png'}}" mode="aspectFill" lazy-load />
+            <view class="recipe-difficulty" wx:if="{{item.difficulty}}">
+              <text>{{item.difficulty == 1 ? '简单' : item.difficulty == 2 ? '中等' : '困难'}}</text>
+            </view>
+            <view class="recipe-time" wx:if="{{item.cooking_time}}">
+              <text>⏱️ {{item.cooking_time}}</text>
+            </view>
+          </view>
+          <view class="recipe-content">
+            <view class="recipe-title flex align-center">
+              <text class="title line-clamp-1">{{item.title}}</text>
+              <view class="recipe-category" style="background: {{item.category_color}};">
+                <text>{{item.category_name}}</text>
+              </view>
+            </view>
+            <text class="recipe-desc line-clamp-2 text-muted">{{item.description}}</text>
+            <view class="recipe-footer flex justify-between align-center">
+              <view class="recipe-author flex align-center">
+                <image class="author-avatar" src="{{item.author_avatar || '/static/images/default-avatar.png'}}" mode="aspectFill" />
+                <text class="author-name text-muted">{{item.author_name}}</text>
+              </view>
+              <view class="recipe-stats flex">
+                <view class="stat-item">
+                  <text class="stat-icon">👁️</text>
+                  <text class="stat-num">{{item.view_count}}</text>
+                </view>
+                <view class="stat-item">
+                  <text class="stat-icon">❤️</text>
+                  <text class="stat-num">{{item.like_count}}</text>
+                </view>
+                <view class="stat-item">
+                  <text class="stat-icon">⭐</text>
+                  <text class="stat-num">{{item.favorite_count}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <view class="empty-state" wx:if="{{recipes.length === 0 && !loading}}">
+          <image src="/static/images/empty-food.png" mode="aspectFit" />
+          <text class="text-muted">暂无菜谱，快来发布第一道菜谱吧~</text>
+        </view>
+      </view>
+      
+      <view class="loading-state" wx:if="{{loading}}">
+        <text class="text-muted">加载中...</text>
+      </view>
+      
+      <view class="no-more" wx:if="{{!hasMore && recipes.length > 0}}">
+        <text class="text-muted">没有更多了~</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

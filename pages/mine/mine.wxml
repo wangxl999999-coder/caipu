@@ -1,0 +1,144 @@
+<view class="page">
+  <view class="user-header">
+    <view class="header-bg">
+      <view class="bg-gradient"></view>
+    </view>
+    
+    <view class="user-info" wx:if="{{isLogin && userInfo}}">
+      <view class="avatar-wrapper">
+        <image class="avatar" src="{{userInfo.avatar || '/static/images/default-avatar.png'}}" mode="aspectFill" />
+      </view>
+      <view class="info-content">
+        <view class="nickname flex align-center">
+          <text class="nickname-text">{{userInfo.nickname || '美食爱好者'}}</text>
+          <view class="vip-badge" wx:if="{{userInfo.is_admin}}">
+            <text>管理员</text>
+          </view>
+        </view>
+        <text class="user-id">ID: {{userInfo.id}}</text>
+      </view>
+      <view class="logout-btn" bindtap="handleLogout">
+        <text>退出</text>
+      </view>
+    </view>
+    
+    <view class="user-info login-prompt" wx:else bindtap="handleLogin">
+      <view class="avatar-wrapper">
+        <view class="avatar-placeholder">
+          <text>😊</text>
+        </view>
+      </view>
+      <view class="info-content">
+        <text class="login-text">点击登录</text>
+        <text class="login-desc">登录后享受更多功能</text>
+      </view>
+      <view class="login-arrow">
+        <text>›</text>
+      </view>
+    </view>
+    
+    <view class="statistics" wx:if="{{isLogin}}">
+      <view class="stat-item">
+        <text class="stat-num">{{statistics.recipe_count}}</text>
+        <text class="stat-label">发布菜谱</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-num">{{statistics.favorite_count}}</text>
+        <text class="stat-label">收藏数</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-num">{{statistics.like_count}}</text>
+        <text class="stat-label">点赞数</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="content">
+    <view class="quick-actions">
+      <view class="action-item" bindtap="goToPage" data-page="publish">
+        <view class="action-icon" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);">
+          <text>✏️</text>
+        </view>
+        <text class="action-text">发布菜谱</text>
+      </view>
+      <view class="action-item" bindtap="goToPage" data-page="favorites">
+        <view class="action-icon" style="background: linear-gradient(135deg, #4ECDC4 0%, #6EE7DE 100%);">
+          <text>⭐</text>
+        </view>
+        <text class="action-text">我的收藏</text>
+      </view>
+      <view class="action-item" bindtap="goToPage" data-page="recipes">
+        <view class="action-icon" style="background: linear-gradient(135deg, #45B7D1 0%, #6AC9E0 100%);">
+          <text>📋</text>
+        </view>
+        <text class="action-text">我的发布</text>
+      </view>
+    </view>
+
+    <view class="menu-section">
+      <view class="menu-header">
+        <text class="menu-title">功能菜单</text>
+      </view>
+      
+      <view class="menu-list">
+        <view class="menu-item" bindtap="goToPage" data-page="favorites">
+          <view class="menu-left flex align-center">
+            <view class="menu-icon" style="background: #FF6B6B10;">
+              <text style="color: #FF6B6B;">❤️</text>
+            </view>
+            <text class="menu-text">我的收藏</text>
+          </view>
+          <view class="menu-arrow">
+            <text>›</text>
+          </view>
+        </view>
+        
+        <view class="menu-item" bindtap="goToPage" data-page="recipes">
+          <view class="menu-left flex align-center">
+            <view class="menu-icon" style="background: #4ECDC410;">
+              <text style="color: #4ECDC4;">🍳</text>
+            </view>
+            <text class="menu-text">我的菜谱</text>
+          </view>
+          <view class="menu-arrow">
+            <text>›</text>
+          </view>
+        </view>
+        
+        <view class="menu-item" bindtap="goToPage" data-page="publish">
+          <view class="menu-left flex align-center">
+            <view class="menu-icon" style="background: #45B7D110;">
+              <text style="color: #45B7D1;">➕</text>
+            </view>
+            <text class="menu-text">发布菜谱</text>
+          </view>
+          <view class="menu-arrow">
+            <text>›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="menu-section">
+      <view class="menu-header">
+        <text class="menu-title">其他</text>
+      </view>
+      
+      <view class="menu-list">
+        <view class="menu-item" bindtap="goToPage" data-page="about">
+          <view class="menu-left flex align-center">
+            <view class="menu-icon" style="background: #96CEB410;">
+              <text style="color: #96CEB4;">ℹ️</text>
+            </view>
+            <text class="menu-text">关于我们</text>
+          </view>
+          <view class="menu-arrow">
+            <text>›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

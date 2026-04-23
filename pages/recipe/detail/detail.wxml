@@ -1,0 +1,151 @@
+<view class="page">
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-content">
+      <text class="text-muted">加载中...</text>
+    </view>
+  </view>
+
+  <view class="recipe-container" wx:else>
+    <view class="recipe-header">
+      <view class="recipe-image">
+        <image src="{{recipe.image || '/static/images/default-recipe.png'}}" mode="aspectFill" bindtap="previewImage" data-url="{{recipe.image}}" />
+      </view>
+      
+      <view class="recipe-meta">
+        <view class="meta-row">
+          <view class="author-info flex align-center" bindtap="goToAuthor">
+            <image class="author-avatar" src="{{recipe.author_avatar || '/static/images/default-avatar.png'}}" mode="aspectFill" />
+            <text class="author-name">{{recipe.author_name}}</text>
+          </view>
+          <view class="recipe-category" style="background: {{recipe.category_color}};">
+            <text>{{recipe.category_name}}</text>
+          </view>
+        </view>
+        
+        <text class="recipe-title">{{recipe.title}}</text>
+        <text class="recipe-desc">{{recipe.description}}</text>
+        
+        <view class="recipe-tags">
+          <view class="tag tag-info" wx:if="{{recipe.difficulty}}">
+            <text>难度: {{recipe.difficulty_text}}</text>
+          </view>
+          <view class="tag tag-success" wx:if="{{recipe.cooking_time}}">
+            <text>⏱️ {{recipe.cooking_time}}</text>
+          </view>
+          <view class="tag tag-primary" wx:if="{{recipe.suitable_people}}">
+            <text>适合: {{recipe.suitable_people}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section stats-section">
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-num">{{recipe.view_count}}</text>
+          <text class="stat-label">浏览</text>
+        </view>
+        <view class="stat-item" bindtap="toggleLike">
+          <text class="stat-icon">{{isLiked ? '❤️' : '🤍'}}</text>
+          <text class="stat-num">{{recipe.like_count}}</text>
+          <text class="stat-label">点赞</text>
+        </view>
+        <view class="stat-item" bindtap="toggleFavorite">
+          <text class="stat-icon">{{isFavorited ? '⭐' : '☆'}}</text>
+          <text class="stat-num">{{recipe.favorite_count}}</text>
+          <text class="stat-label">收藏</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-icon">📤</text>
+          <text class="stat-label">分享</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">
+        <text class="title-icon">🥘</text>
+        <text class="title-text">所需食材</text>
+      </view>
+      
+      <view class="materials-grid">
+        <view class="material-item" wx:for="{{recipe.materials}}" wx:key="name" wx:if="{{recipe.materials.length > 0}}">
+          <view class="material-name">{{item.name}}</view>
+          <view class="material-amount">{{item.amount}}</view>
+        </view>
+        
+        <view class="empty-materials" wx:else>
+          <text class="text-muted">暂无食材信息</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">
+        <text class="title-icon">📝</text>
+        <text class="title-text">制作步骤</text>
+      </view>
+      
+      <view class="steps-list">
+        <view class="step-item" wx:for="{{recipe.steps}}" wx:key="order" wx:if="{{recipe.steps.length > 0}}">
+          <view class="step-order">
+            <text>{{item.order || index + 1}}</text>
+          </view>
+          <view class="step-content">
+            <image class="step-image" wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" bindtap="previewImage" data-url="{{item.image}}" />
+            <text class="step-desc">{{item.desc}}</text>
+          </view>
+        </view>
+        
+        <view class="empty-steps" wx:else>
+          <text class="text-muted">暂无制作步骤</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section" wx:if="{{recipe.tips}}">
+      <view class="section-title">
+        <text class="title-icon">💡</text>
+        <text class="title-text">小贴士</text>
+      </view>
+      
+      <view class="tips-box">
+        <text class="tips-text">{{recipe.tips}}</text>
+      </view>
+    </view>
+
+    <view class="images-section" wx:if="{{recipe.images.length > 1 || (recipe.images.length == 1 && recipe.images[0] != recipe.image)}}">
+      <view class="section-title">
+        <text class="title-icon">📷</text>
+        <text class="title-text">成品展示</text>
+      </view>
+      
+      <view class="images-grid">
+        <view class="image-item" wx:for="{{recipe.images}}" wx:key="*this" bindtap="previewImage" data-url="{{item}}">
+          <image src="{{item}}" mode="aspectFill" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-bar safe-area-bottom" wx:if="{{!loading}}">
+    <view class="bar-actions">
+      <view class="action-item {{isLiked ? 'active' : ''}}" bindtap="toggleLike">
+        <text class="action-icon">{{isLiked ? '❤️' : '🤍'}}</text>
+        <text class="action-text">点赞</text>
+      </view>
+      <view class="action-item {{isFavorited ? 'active' : ''}}" bindtap="toggleFavorite">
+        <text class="action-icon">{{isFavorited ? '⭐' : '☆'}}</text>
+        <text class="action-text">收藏</text>
+      </view>
+    </view>
+    <view class="bar-btns">
+      <view class="btn-share" open-type="share">
+        <text>分享</text>
+      </view>
+      <view class="btn-edit" wx:if="{{recipe && recipe.user_id == app.globalData.userInfo?.id}}" bindtap="goToEdit">
+        <text>编辑</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,90 @@
+<view class="page">
+  <view class="page-header">
+    <text class="page-title">美食分类</text>
+    <text class="page-desc">发现更多美味</text>
+  </view>
+
+  <view class="category-tabs">
+    <scroll-view scroll-x show-scrollbar="{{false}}">
+      <view class="tabs-list flex">
+        <view 
+          class="tab-item {{currentCategory.id == item.id ? 'active' : ''}}" 
+          wx:for="{{categories}}" 
+          wx:key="id"
+          bindtap="onCategoryTap"
+          data-index="{{index}}"
+          style="border-color: {{item.color}};"
+        >
+          <text class="tab-icon" style="background: {{item.color}}20; color: {{item.color}};">🍽️</text>
+          <text class="tab-name">{{item.name}}</text>
+          <text class="tab-count" wx:if="{{item.recipe_count > 0}}">{{item.recipe_count}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="sort-bar">
+    <view class="sort-item {{orderBy == 'new' ? 'active' : ''}}" bindtap="onOrderChange" data-order="new">
+      <text>最新</text>
+    </view>
+    <view class="sort-item {{orderBy == 'hot' ? 'active' : ''}}" bindtap="onOrderChange" data-order="hot">
+      <text>热门</text>
+    </view>
+    <view class="sort-item {{orderBy == 'like' ? 'active' : ''}}" bindtap="onOrderChange" data-order="like">
+      <text>最多点赞</text>
+    </view>
+    <view class="sort-item {{orderBy == 'favorite' ? 'active' : ''}}" bindtap="onOrderChange" data-order="favorite">
+      <text>最多收藏</text>
+    </view>
+  </view>
+
+  <scroll-view class="content" scroll-y enhanced>
+    <view class="recipe-grid" wx:if="{{recipes.length > 0}}">
+      <view 
+        class="recipe-item" 
+        wx:for="{{recipes}}" 
+        wx:key="id"
+        bindtap="goToRecipeDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="recipe-image">
+          <image src="{{item.image || '/static/images/default-recipe.png'}}" mode="aspectFill" lazy-load />
+          <view class="recipe-category" style="background: {{item.category_color}};">
+            <text>{{item.category_name}}</text>
+          </view>
+        </view>
+        <view class="recipe-info">
+          <text class="recipe-title line-clamp-1">{{item.title}}</text>
+          <text class="recipe-desc line-clamp-2">{{item.description}}</text>
+          <view class="recipe-stats flex align-center">
+            <view class="stat-item">
+              <text>👁️</text>
+              <text>{{item.view_count}}</text>
+            </view>
+            <view class="stat-item">
+              <text>❤️</text>
+              <text>{{item.like_count}}</text>
+            </view>
+            <view class="stat-item">
+              <text>⭐</text>
+              <text>{{item.favorite_count}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{recipes.length === 0 && !loading}}">
+      <image src="/static/images/empty-food.png" mode="aspectFit" />
+      <text class="text-muted">该分类下暂无菜谱~</text>
+    </view>
+
+    <view class="loading-state" wx:if="{{loading}}">
+      <text class="text-muted">加载中...</text>
+    </view>
+
+    <view class="no-more" wx:if="{{!hasMore && recipes.length > 0}}">
+      <text class="text-muted">没有更多了~</text>
+    </view>
+  </scroll-view>
+</view>

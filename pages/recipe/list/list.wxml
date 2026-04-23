@@ -1,0 +1,77 @@
+<view class="page">
+  <view class="sort-bar">
+    <view class="sort-item {{orderBy == 'new' ? 'active' : ''}}" bindtap="onOrderChange" data-order="new">
+      <text>最新</text>
+    </view>
+    <view class="sort-item {{orderBy == 'hot' ? 'active' : ''}}" bindtap="onOrderChange" data-order="hot">
+      <text>热门</text>
+    </view>
+    <view class="sort-item {{orderBy == 'like' ? 'active' : ''}}" bindtap="onOrderChange" data-order="like">
+      <text>点赞</text>
+    </view>
+    <view class="sort-item {{orderBy == 'favorite' ? 'active' : ''}}" bindtap="onOrderChange" data-order="favorite">
+      <text>收藏</text>
+    </view>
+  </view>
+
+  <scroll-view class="content" scroll-y enhanced>
+    <view class="recipe-list" wx:if="{{recipes.length > 0}}">
+      <view 
+        class="recipe-item card" 
+        wx:for="{{recipes}}" 
+        wx:key="id"
+        bindtap="goToRecipeDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="recipe-image">
+          <image src="{{item.image || '/static/images/default-recipe.png'}}" mode="aspectFill" lazy-load />
+          <view class="recipe-difficulty" wx:if="{{item.difficulty}}">
+            <text>{{item.difficulty == 1 ? '简单' : item.difficulty == 2 ? '中等' : '困难'}}</text>
+          </view>
+        </view>
+        <view class="recipe-info">
+          <view class="recipe-title flex align-center">
+            <text class="title line-clamp-1">{{item.title}}</text>
+            <view class="recipe-category" style="background: {{item.category_color}};">
+              <text>{{item.category_name}}</text>
+            </view>
+          </view>
+          <text class="recipe-desc line-clamp-2 text-muted">{{item.description}}</text>
+          <view class="recipe-footer flex justify-between align-center">
+            <view class="recipe-author flex align-center">
+              <image class="author-avatar" src="{{item.author_avatar || '/static/images/default-avatar.png'}}" mode="aspectFill" />
+              <text class="author-name text-muted">{{item.author_name}}</text>
+            </view>
+            <view class="recipe-stats flex">
+              <view class="stat-item">
+                <text>👁️</text>
+                <text>{{item.view_count}}</text>
+              </view>
+              <view class="stat-item">
+                <text>❤️</text>
+                <text>{{item.like_count}}</text>
+              </view>
+              <view class="stat-item">
+                <text>⭐</text>
+                <text>{{item.favorite_count}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{recipes.length === 0 && !loading}}">
+      <image src="/static/images/empty-food.png" mode="aspectFit" />
+      <text class="text-muted">暂无相关菜谱~</text>
+    </view>
+
+    <view class="loading-state" wx:if="{{loading}}">
+      <text class="text-muted">加载中...</text>
+    </view>
+
+    <view class="no-more" wx:if="{{!hasMore && recipes.length > 0}}">
+      <text class="text-muted">没有更多了~</text>
+    </view>
+  </scroll-view>
+</view>

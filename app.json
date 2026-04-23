@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/category/category",
+    "pages/mine/mine",
+    "pages/recipe/detail/detail",
+    "pages/recipe/list/list",
+    "pages/recipe/publish/publish",
+    "pages/recipe/edit/edit",
+    "pages/mine/favorites/favorites",
+    "pages/mine/recipes/recipes",
+    "pages/mine/about/about"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FF6B6B",
+    "navigationBarTitleText": "美食菜谱",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#FFF5F5"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#FF6B6B",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/images/tab-home.png",
+        "selectedIconPath": "static/images/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/category/category",
+        "text": "分类",
+        "iconPath": "static/images/tab-category.png",
+        "selectedIconPath": "static/images/tab-category-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "static/images/tab-mine.png",
+        "selectedIconPath": "static/images/tab-mine-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

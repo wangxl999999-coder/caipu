@@ -1,0 +1,165 @@
+<view class="page">
+  <scroll-view class="content" scroll-y enhanced>
+    <view class="form-section">
+      <view class="section-title">
+        <text class="title-icon">📝</text>
+        <text class="title-text">基本信息</text>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">菜谱名称 <text class="required">*</text></view>
+        <input class="form-input" placeholder="请输入菜谱名称" value="{{formData.title}}" data-field="title" bindinput="onInputChange" maxlength="50" />
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">所属分类 <text class="required">*</text></view>
+        <picker class="form-picker" range="{{categories}}" range-key="name" value="{{formData.category_id ? categories.findIndex(c => c.id == formData.category_id) : ''}}" bindchange="onCategoryChange">
+          <view class="picker-value">
+            <text wx:if="{{formData.category_id}}">{{categories[categories.findIndex(c => c.id == formData.category_id)]?.name}}</text>
+            <text wx:else class="placeholder">请选择分类</text>
+          </view>
+          <text class="picker-arrow">›</text>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">菜谱简述</view>
+        <textarea class="form-textarea" placeholder="简要描述这道菜的特点" value="{{formData.description}}" data-field="description" bindinput="onInputChange" maxlength="200" />
+      </view>
+    </view>
+
+    <view class="form-section">
+      <view class="section-title">
+        <text class="title-icon">🖼️</text>
+        <text class="title-text">图片上传</text>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">主图 <text class="required">*</text></view>
+        <view class="image-upload" bindtap="chooseMainImage">
+          <image wx:if="{{formData.image}}" class="uploaded-image" src="{{formData.image}}" mode="aspectFill" />
+          <view wx:else class="upload-placeholder">
+            <text class="placeholder-icon">+</text>
+            <text class="placeholder-text">点击上传主图</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">更多图片</view>
+        <view class="images-grid">
+          <view class="image-item" wx:for="{{formData.images}}" wx:key="*this">
+            <image class="item-image" src="{{item}}" mode="aspectFill" />
+            <view class="item-remove" bindtap="removeImage" data-index="{{index}}">
+              <text>×</text>
+            </view>
+          </view>
+          <view class="image-item add-item" bindtap="chooseMoreImages" wx:if="{{formData.images.length < 9}}">
+            <text class="add-icon">+</text>
+            <text class="add-text">添加图片</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-section">
+      <view class="section-title">
+        <text class="title-icon">🥘</text>
+        <text class="title-text">所需食材 <text class="required">*</text></text>
+      </view>
+      
+      <view class="materials-list" wx:if="{{formData.materials.length > 0}}">
+        <view class="material-item" wx:for="{{formData.materials}}" wx:key="index">
+          <view class="material-info">
+            <text class="material-name">{{item.name}}</text>
+            <text class="material-amount">{{item.amount}}</text>
+          </view>
+          <view class="material-remove" bindtap="removeMaterial" data-index="{{index}}">
+            <text>×</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="material-add">
+        <input class="add-input" placeholder="食材名称" value="{{materialName}}" bindinput="onMaterialNameInput" />
+        <input class="add-input amount-input" placeholder="用量" value="{{materialAmount}}" bindinput="onMaterialAmountInput" />
+        <view class="add-btn" bindtap="addMaterial">
+          <text>+ 添加</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-section">
+      <view class="section-title">
+        <text class="title-icon">📝</text>
+        <text class="title-text">制作步骤 <text class="required">*</text></text>
+      </view>
+      
+      <view class="steps-list" wx:if="{{formData.steps.length > 0}}">
+        <view class="step-item" wx:for="{{formData.steps}}" wx:key="index">
+          <view class="step-order">
+            <text>{{item.order}}</text>
+          </view>
+          <view class="step-content">
+            <image class="step-image" wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" />
+            <text class="step-desc">{{item.desc}}</text>
+          </view>
+          <view class="step-remove" bindtap="removeStep" data-index="{{index}}">
+            <text>×</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="step-add">
+        <view class="add-image" bindtap="chooseStepImage">
+          <image wx:if="{{stepImage}}" class="preview-image" src="{{stepImage}}" mode="aspectFill" />
+          <view wx:else class="image-placeholder">
+            <text>📷 添加图片</text>
+          </view>
+        </view>
+        <textarea class="step-input" placeholder="描述这一步的操作..." value="{{stepDesc}}" bindinput="onStepDescInput" maxlength="500" />
+        <view class="add-btn" bindtap="addStep">
+          <text>+ 添加步骤</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="form-section">
+      <view class="section-title">
+        <text class="title-icon">⚙️</text>
+        <text class="title-text">其他信息</text>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">难度</view>
+        <picker class="form-picker" range="{{['简单', '中等', '困难']}}" value="{{formData.difficulty - 1}}" bindchange="onDifficultyChange">
+          <view class="picker-value">
+            <text>{{formData.difficulty == 1 ? '简单' : formData.difficulty == 2 ? '中等' : '困难'}}</text>
+          </view>
+          <text class="picker-arrow">›</text>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">烹饪时间</view>
+        <input class="form-input" placeholder="例如：30分钟" value="{{formData.cooking_time}}" data-field="cooking_time" bindinput="onInputChange" maxlength="20" />
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">适合人群</view>
+        <input class="form-input" placeholder="例如：老少皆宜、孕妇慎食" value="{{formData.suitable_people}}" data-field="suitable_people" bindinput="onInputChange" maxlength="50" />
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">小贴士</view>
+        <textarea class="form-textarea" placeholder="制作这道菜的小技巧、注意事项等" value="{{formData.tips}}" data-field="tips" bindinput="onInputChange" maxlength="300" />
+      </view>
+    </view>
+
+    <view class="form-section submit-section">
+      <view class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="submit">
+        <text>{{submitting ? '发布中...' : '发布菜谱'}}</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>

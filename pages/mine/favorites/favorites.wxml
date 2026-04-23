@@ -1,0 +1,58 @@
+<view class="page">
+  <view class="page-header">
+    <text class="page-title">我的收藏</text>
+    <text class="page-desc">共 {{total}} 道收藏菜谱</text>
+  </view>
+
+  <scroll-view class="content" scroll-y enhanced enablePullDownRefresh>
+    <view class="recipe-list" wx:if="{{recipes.length > 0}}">
+      <view 
+        class="recipe-item card" 
+        wx:for="{{recipes}}" 
+        wx:key="id"
+      >
+        <view class="recipe-image" bindtap="goToRecipeDetail" data-id="{{item.id}}">
+          <image src="{{item.image || '/static/images/default-recipe.png'}}" mode="aspectFill" lazy-load />
+          <view class="recipe-category" style="background: {{item.category_color}};">
+            <text>{{item.category_name}}</text>
+          </view>
+        </view>
+        <view class="recipe-info">
+          <text class="recipe-title line-clamp-1" bindtap="goToRecipeDetail" data-id="{{item.id}}">{{item.title}}</text>
+          <text class="recipe-desc line-clamp-2 text-muted">{{item.description}}</text>
+          <view class="recipe-footer flex justify-between align-center">
+            <view class="recipe-stats flex">
+              <view class="stat-item">
+                <text>👁️</text>
+                <text>{{item.view_count}}</text>
+              </view>
+              <view class="stat-item">
+                <text>❤️</text>
+                <text>{{item.like_count}}</text>
+              </view>
+            </view>
+            <view class="favorite-btn active" bindtap="toggleFavorite" data-id="{{item.id}}" data-index="{{index}}">
+              <text>⭐ 已收藏</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{recipes.length === 0 && !loading}}">
+      <image src="/static/images/empty-favorite.png" mode="aspectFit" />
+      <text class="text-muted">暂无收藏的菜谱~</text>
+      <view class="empty-action" bindtap="goToHome">
+        <text>去发现美食</text>
+      </view>
+    </view>
+
+    <view class="loading-state" wx:if="{{loading && recipes.length > 0}}">
+      <text class="text-muted">加载中...</text>
+    </view>
+
+    <view class="no-more" wx:if="{{!hasMore && recipes.length > 0}}">
+      <text class="text-muted">没有更多了~</text>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "美食菜谱",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {}
+}

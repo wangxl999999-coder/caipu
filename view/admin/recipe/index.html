@@ -1,0 +1,217 @@
+{include file="admin/public/header" /}
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">菜谱管理</span>
+    </div>
+    <div class="card-body">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="搜索菜谱名称" id="searchKeyword" value="{$keyword|default=''}">
+            <select class="search-select" id="searchCategory">
+                <option value="">全部分类</option>
+                {foreach $categories as $category}
+                <option value="{$category.id}" {if $category_id == $category.id}selected{/if}>{$category.name}</option>
+                {/foreach}
+            </select>
+            <select class="search-select" id="searchStatus">
+                <option value="">全部状态</option>
+                <option value="0" {if $status === '0'}selected{/if}>待审核</option>
+                <option value="1" {if $status === '1'}selected{/if}>已发布</option>
+                <option value="2" {if $status === '2'}selected{/if}>已下架</option>
+            </select>
+            <button class="btn btn-primary" onclick="searchRecipes()">🔍 搜索</button>
+            <button class="btn btn-secondary" onclick="resetSearch()">🔄 重置</button>
+        </div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th width="80">ID</th>
+                    <th width="120">图片</th>
+                    <th>菜谱名称</th>
+                    <th width="100">作者</th>
+                    <th width="100">分类</th>
+                    <th width="60">浏览</th>
+                    <th width="60">点赞</th>
+                    <th width="60">收藏</th>
+                    <th width="80">状态</th>
+                    <th width="120">发布时间</th>
+                    <th width="200">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $list as $recipe}
+                <tr>
+                    <td>{$recipe.id}</td>
+                    <td>
+                        {if $recipe.image}
+                        <img src="{$recipe.image}" style="width: 80px; height: 55px; border-radius: 6px; object-fit: cover;">
+                        {else/}
+                        <div style="width: 80px; height: 55px; background: linear-gradient(135deg, #FFEAA7 0%, #FF6B6B 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 20px;">🍽️</span>
+                        </div>
+                        {/if}
+                    </td>
+                    <td>{$recipe.title}</td>
+                    <td>{$recipe.nickname|default='-'}</td>
+                    <td>
+                        {if $recipe.category_name}
+                        <span class="status-badge status-info">{$recipe.category_name}</span>
+                        {else/}
+                        <span>-</span>
+                        {/if}
+                    </td>
+                    <td>{$recipe.view_count|default=0}</td>
+                    <td>{$recipe.like_count|default=0}</td>
+                    <td>{$recipe.favorite_count|default=0}</td>
+                    <td>
+                        {if $recipe.status == 1}
+                        <span class="status-badge status-success">已发布</span>
+                        {elseif $recipe.status == 0}
+                        <span class="status-badge status-warning">待审核</span>
+                        {else/}
+                        <span class="status-badge status-danger">已下架</span>
+                        {/if}
+                    </td>
+                    <td>{$recipe.create_time}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="viewDetail({$recipe.id})">详情</button>
+                        {if $recipe.status == 0}
+                        <button class="btn btn-success btn-sm" onclick="reviewRecipe({$recipe.id}, 1)">通过</button>
+                        <button class="btn btn-danger btn-sm" onclick="reviewRecipe({$recipe.id}, 2)">下架</button>
+                        {elseif $recipe.status == 1}
+                        <button class="btn btn-secondary btn-sm" onclick="toggleStatus({$recipe.id}, 2)">下架</button>
+                        {else/}
+                        <button class="btn btn-success btn-sm" onclick="toggleStatus({$recipe.id}, 1)">上架</button>
+                        {/if}
+                        <button class="btn btn-danger btn-sm" onclick="deleteRecipe({$recipe.id})">删除</button>
+                    </td>
+                </tr>
+                {foreachelse}
+                <tr>
+                    <td colspan="12" style="text-align: center; padding: 60px;">
+                        <div class="empty-state">
+                            <span style="font-size: 48px; margin-bottom: 16px; display: block;">📋</span>
+                            <p>暂无菜谱数据</p>
+                        </div>
+                    </td>
+                </tr>
+                {/foreach}
+            </tbody>
+        </table>
+        
+        {if $total > 0}
+        <div class="pagination">
+            <span class="pagination-info">共 {$total} 条记录</span>
+            <a href="/admin/recipe/index?page={$page-1}&keyword={$keyword|default=''}&category_id={$category_id|default=''}&status={$status|default=''}" class="pagination-btn" {if $page <= 1}disabled{/if}>‹</a>
+            {for $i=1 to $total_page}
+            <a href="/admin/recipe/index?page={$i}&keyword={$keyword|default=''}&category_id={$category_id|default=''}&status={$status|default=''}" class="pagination-btn {if $page == $i}active{/if}">{$i}</a>
+            {/for}
+            <a href="/admin/recipe/index?page={$page+1}&keyword={$keyword|default=''}&category_id={$category_id|default=''}&status={$status|default=''}" class="pagination-btn" {if $page >= $total_page}disabled{/if}>›</a>
+        </div>
+        {/if}
+    </div>
+</div>
+
+{include file="admin/public/footer" /}
+
+<script>
+    function searchRecipes() {
+        const keyword = document.getElementById('searchKeyword').value.trim();
+        const category_id = document.getElementById('searchCategory').value;
+        const status = document.getElementById('searchStatus').value;
+        
+        let url = '/admin/recipe/index';
+        let params = [];
+        if (keyword) params.push('keyword=' + encodeURIComponent(keyword));
+        if (category_id !== '') params.push('category_id=' + category_id);
+        if (status !== '') params.push('status=' + status);
+        
+        if (params.length > 0) {
+            url += '?' + params.join('&');
+        }
+        
+        window.location.href = url;
+    }
+    
+    function resetSearch() {
+        window.location.href = '/admin/recipe/index';
+    }
+    
+    function viewDetail(id) {
+        window.open('/admin/recipe/detail?id=' + id, '_blank');
+    }
+    
+    async function reviewRecipe(id, status) {
+        const action = status === 1 ? '审核通过' : '下架';
+        showConfirm('审核确认', `确定要${action}该菜谱吗？`, async function() {
+            try {
+                const response = await axios.post('/admin/recipe/updateStatus', {
+                    id: id,
+                    status: status
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '操作成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+    
+    async function toggleStatus(id, status) {
+        const action = status === 1 ? '上架' : '下架';
+        showConfirm('确认操作', `确定要${action}该菜谱吗？`, async function() {
+            try {
+                const response = await axios.post('/admin/recipe/updateStatus', {
+                    id: id,
+                    status: status
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '操作成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+    
+    async function deleteRecipe(id) {
+        showConfirm('删除确认', '确定要删除该菜谱吗？删除后无法恢复。', async function() {
+            try {
+                const response = await axios.post('/admin/recipe/delete', {
+                    id: id
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '删除成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '删除失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+    
+    document.getElementById('searchKeyword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchRecipes();
+        }
+    });
+</script>

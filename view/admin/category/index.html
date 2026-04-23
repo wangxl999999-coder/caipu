@@ -1,0 +1,298 @@
+{include file="admin/public/header" /}
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">分类管理</span>
+        <button class="btn btn-primary" onclick="openAddModal()">➕ 新增分类</button>
+    </div>
+    <div class="card-body">
+        {if $list && count($list) > 0}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th width="80">ID</th>
+                    <th width="100">图标</th>
+                    <th>分类名称</th>
+                    <th width="120">主题色</th>
+                    <th width="80">排序</th>
+                    <th width="80">菜谱数</th>
+                    <th width="80">状态</th>
+                    <th width="120">创建时间</th>
+                    <th width="150">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $list as $category}
+                <tr>
+                    <td>{$category.id}</td>
+                    <td>
+                        <span style="font-size: 28px;">{$category.icon|default='🍽️'}</span>
+                    </td>
+                    <td>{$category.name}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; border-radius: 6px; background: {$category.color|default='#FF6B6B'};"></div>
+                            <span style="font-size: 13px; color: #999;">{$category.color|default='#FF6B6B'}</span>
+                        </div>
+                    </td>
+                    <td>{$category.sort|default=0}</td>
+                    <td>{$category.recipe_count|default=0}</td>
+                    <td>
+                        {if $category.status == 1}
+                        <span class="status-badge status-success">启用</span>
+                        {else/}
+                        <span class="status-badge status-danger">禁用</span>
+                        {/if}
+                    </td>
+                    <td>{$category.create_time}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="openEditModal({$category.id})">编辑</button>
+                        {if $category.status == 1}
+                        <button class="btn btn-secondary btn-sm" onclick="toggleStatus({$category.id}, 0)">禁用</button>
+                        {else/}
+                        <button class="btn btn-success btn-sm" onclick="toggleStatus({$category.id}, 1)">启用</button>
+                        {/if}
+                        <button class="btn btn-danger btn-sm" onclick="deleteCategory({$category.id})">删除</button>
+                    </td>
+                </tr>
+                {/foreach}
+            </tbody>
+        </table>
+        {else/}
+        <div class="empty-state">
+            <span style="font-size: 48px; margin-bottom: 16px; display: block;">📁</span>
+            <p>暂无分类数据</p>
+            <button class="btn btn-primary" style="margin-top: 20px;" onclick="openAddModal()">新增分类</button>
+        </div>
+        {/if}
+    </div>
+</div>
+
+<div id="categoryModal" class="modal-overlay">
+    <div class="modal" style="max-width: 500px;">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">新增分类</span>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="categoryForm">
+                <input type="hidden" id="categoryId" value="">
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        分类名称
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-input" id="categoryName" placeholder="请输入分类名称">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">图标</label>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍱')">🍱</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍲')">🍲</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍜')">🍜</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍝')">🍝</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍛')">🍛</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🥗')">🥗</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🥘')">🥘</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍔')">🍔</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍕')">🍕</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍣')">🍣</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍤')">🍤</button>
+                        <button type="button" class="emoji-btn" onclick="selectEmoji('🍰')">🍰</button>
+                    </div>
+                    <input type="text" class="form-input" id="categoryIcon" placeholder="或输入表情符号" style="max-width: 150px;">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">主题色</label>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <input type="color" id="categoryColor" value="#FF6B6B" style="width: 50px; height: 40px; border: none; border-radius: 6px; cursor: pointer; padding: 0;">
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="color-preset" style="background: #FF6B6B;" onclick="selectColor('#FF6B6B')"></button>
+                            <button type="button" class="color-preset" style="background: #4ECDC4;" onclick="selectColor('#4ECDC4')"></button>
+                            <button type="button" class="color-preset" style="background: #45B7D1;" onclick="selectColor('#45B7D1')"></button>
+                            <button type="button" class="color-preset" style="background: #FFD93D;" onclick="selectColor('#FFD93D')"></button>
+                            <button type="button" class="color-preset" style="background: #96CEB4;" onclick="selectColor('#96CEB4')"></button>
+                            <button type="button" class="color-preset" style="background: #FF8A5C;" onclick="selectColor('#FF8A5C')"></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">排序</label>
+                    <input type="number" class="form-input" id="categorySort" placeholder="数字越小越靠前" value="0" style="max-width: 150px;">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveCategory()">保存</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .emoji-btn {
+        width: 40px;
+        height: 40px;
+        border: 1px solid #E0E0E0;
+        border-radius: 8px;
+        background: #FFFFFF;
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .emoji-btn:hover {
+        border-color: #FF6B6B;
+        transform: scale(1.1);
+    }
+    
+    .color-preset {
+        width: 32px;
+        height: 32px;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0;
+    }
+    
+    .color-preset:hover {
+        transform: scale(1.1);
+        border-color: #333;
+    }
+</style>
+
+{include file="admin/public/footer" /}
+
+<script>
+    function openAddModal() {
+        document.getElementById('modalTitle').textContent = '新增分类';
+        document.getElementById('categoryId').value = '';
+        document.getElementById('categoryName').value = '';
+        document.getElementById('categoryIcon').value = '🍽️';
+        document.getElementById('categoryColor').value = '#FF6B6B';
+        document.getElementById('categorySort').value = '0';
+        document.getElementById('categoryModal').classList.add('show');
+    }
+    
+    function openEditModal(id) {
+        const categories = {$list|json_encode};
+        const category = categories.find(item => item.id === id);
+        
+        if (category) {
+            document.getElementById('modalTitle').textContent = '编辑分类';
+            document.getElementById('categoryId').value = category.id;
+            document.getElementById('categoryName').value = category.name || '';
+            document.getElementById('categoryIcon').value = category.icon || '🍽️';
+            document.getElementById('categoryColor').value = category.color || '#FF6B6B';
+            document.getElementById('categorySort').value = category.sort || 0;
+            document.getElementById('categoryModal').classList.add('show');
+        }
+    }
+    
+    function closeModal() {
+        document.getElementById('categoryModal').classList.remove('show');
+    }
+    
+    function selectEmoji(emoji) {
+        document.getElementById('categoryIcon').value = emoji;
+    }
+    
+    function selectColor(color) {
+        document.getElementById('categoryColor').value = color;
+    }
+    
+    async function saveCategory() {
+        const id = document.getElementById('categoryId').value;
+        const name = document.getElementById('categoryName').value.trim();
+        const icon = document.getElementById('categoryIcon').value || '🍽️';
+        const color = document.getElementById('categoryColor').value;
+        const sort = parseInt(document.getElementById('categorySort').value) || 0;
+        
+        if (!name) {
+            showToast('请输入分类名称', 'error');
+            return;
+        }
+        
+        try {
+            const url = id ? '/admin/category/update' : '/admin/category/create';
+            const data = id ? {
+                id: parseInt(id),
+                name: name,
+                icon: icon,
+                color: color,
+                sort: sort
+            } : {
+                name: name,
+                icon: icon,
+                color: color,
+                sort: sort
+            };
+            
+            const response = await axios.post(url, data);
+            
+            if (response.data.code === 200) {
+                showToast(response.data.msg || '保存成功');
+                closeModal();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast(response.data.msg || '保存失败', 'error');
+            }
+        } catch (error) {
+            showToast('网络错误', 'error');
+        }
+    }
+    
+    async function toggleStatus(id, status) {
+        const action = status === 1 ? '启用' : '禁用';
+        showConfirm('确认操作', `确定要${action}该分类吗？`, async function() {
+            try {
+                const response = await axios.post('/admin/category/updateStatus', {
+                    id: id,
+                    status: status
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '操作成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+    
+    async function deleteCategory(id) {
+        showConfirm('删除确认', '确定要删除该分类吗？删除后无法恢复。', async function() {
+            try {
+                const response = await axios.post('/admin/category/delete', {
+                    id: id
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '删除成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '删除失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+</script>

@@ -1,0 +1,87 @@
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+    
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="confirmTitle">确认</span>
+                <button class="modal-close" onclick="closeConfirm()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">确定执行此操作吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeConfirm()">取消</button>
+                <button class="btn btn-danger" id="confirmBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        let confirmCallback = null;
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast toast-' + type + ' show';
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        function showConfirm(title, message, callback) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmModal').classList.add('show');
+            confirmCallback = callback;
+        }
+        
+        function closeConfirm() {
+            document.getElementById('confirmModal').classList.remove('show');
+            confirmCallback = null;
+        }
+        
+        document.getElementById('confirmBtn').addEventListener('click', function() {
+            if (typeof confirmCallback === 'function') {
+                confirmCallback();
+            }
+            closeConfirm();
+        });
+        
+        async function logout() {
+            showConfirm('退出登录', '确定要退出登录吗？', async function() {
+                try {
+                    const response = await axios.post('/admin/login/logout');
+                    if (response.data.code === 200) {
+                        window.location.href = response.data.data.redirect || '/admin/login';
+                    } else {
+                        showToast(response.data.msg || '退出失败', 'error');
+                    }
+                } catch (error) {
+                    showToast('网络错误', 'error');
+                }
+            });
+        }
+        
+        function goTo(url) {
+            window.location.href = url;
+        }
+        
+        function formatDate(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp * 1000);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hour = String(date.getHours()).padStart(2, '0');
+            const minute = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hour}:${minute}`;
+        }
+    </script>
+</body>
+</html>

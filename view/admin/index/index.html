@@ -1,0 +1,157 @@
+{include file="admin/public/header" /}
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon primary">👥</div>
+        </div>
+        <div class="stat-value">{$stats.user_count|default=0}</div>
+        <div class="stat-label">注册用户</div>
+        <div class="stat-change up">较昨日 +{$stats.user_increment|default=0}</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon success">📋</div>
+        </div>
+        <div class="stat-value">{$stats.recipe_count|default=0}</div>
+        <div class="stat-label">菜谱总数</div>
+        <div class="stat-change up">较昨日 +{$stats.recipe_increment|default=0}</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon info">⭐</div>
+        </div>
+        <div class="stat-value">{$stats.favorite_count|default=0}</div>
+        <div class="stat-label">收藏总数</div>
+        <div class="stat-change up">较昨日 +{$stats.favorite_increment|default=0}</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon warning">❤️</div>
+        </div>
+        <div class="stat-value">{$stats.like_count|default=0}</div>
+        <div class="stat-label">点赞总数</div>
+        <div class="stat-change up">较昨日 +{$stats.like_increment|default=0}</div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <span class="card-title">最新菜谱</span>
+        <a href="/admin/recipe/index" class="btn btn-secondary btn-sm">查看全部</a>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th width="80">ID</th>
+                    <th width="120">图片</th>
+                    <th>菜谱名称</th>
+                    <th width="100">作者</th>
+                    <th width="100">分类</th>
+                    <th width="80">状态</th>
+                    <th width="120">发布时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $latest_recipes as $recipe}
+                <tr>
+                    <td>{$recipe.id}</td>
+                    <td>
+                        {if $recipe.image}
+                        <img src="{$recipe.image}" style="width: 60px; height: 45px; border-radius: 6px; object-fit: cover;">
+                        {else/}
+                        <div style="width: 60px; height: 45px; background: linear-gradient(135deg, #FFEAA7 0%, #FF6B6B 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                            <span style="font-size: 16px;">🍽️</span>
+                        </div>
+                        {/if}
+                    </td>
+                    <td>{$recipe.title}</td>
+                    <td>{$recipe.nickname|default='-'}</td>
+                    <td>
+                        {if $recipe.category_name}
+                        <span class="status-badge status-info">{$recipe.category_name}</span>
+                        {else/}
+                        <span>-</span>
+                        {/if}
+                    </td>
+                    <td>
+                        {if $recipe.status == 1}
+                        <span class="status-badge status-success">已发布</span>
+                        {elseif $recipe.status == 0}
+                        <span class="status-badge status-warning">待审核</span>
+                        {else/}
+                        <span class="status-badge status-danger">已下架</span>
+                        {/if}
+                    </td>
+                    <td>{$recipe.create_time}</td>
+                </tr>
+                {foreachelse}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px;">
+                        <span style="color: #999;">暂无数据</span>
+                    </td>
+                </tr>
+                {/foreach}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">最新用户</span>
+        <a href="/admin/user/index" class="btn btn-secondary btn-sm">查看全部</a>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th width="80">ID</th>
+                    <th width="80">头像</th>
+                    <th>昵称</th>
+                    <th width="150">手机号</th>
+                    <th width="80">状态</th>
+                    <th width="80">菜谱数</th>
+                    <th width="120">注册时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $latest_users as $user}
+                <tr>
+                    <td>{$user.id}</td>
+                    <td>
+                        {if $user.avatar}
+                        <img src="{$user.avatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        {else/}
+                        <div class="avatar">{$user.nickname|default='U'|mb_substr=0,1}</div>
+                        {/if}
+                    </td>
+                    <td>{$user.nickname|default='-'}</td>
+                    <td>{$user.phone|default='-'}</td>
+                    <td>
+                        {if $user.status == 1}
+                        <span class="status-badge status-success">正常</span>
+                        {else/}
+                        <span class="status-badge status-danger">禁用</span>
+                        {/if}
+                    </td>
+                    <td>{$user.recipe_count|default=0}</td>
+                    <td>{$user.create_time}</td>
+                </tr>
+                {foreachelse}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px;">
+                        <span style="color: #999;">暂无数据</span>
+                    </td>
+                </tr>
+                {/foreach}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{include file="admin/public/footer" /}

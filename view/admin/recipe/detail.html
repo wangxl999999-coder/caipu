@@ -1,0 +1,283 @@
+{include file="admin/public/header" /}
+
+<div class="card" style="margin-bottom: 24px;">
+    <div class="card-header">
+        <span class="card-title">菜谱详情</span>
+        <div style="display: flex; gap: 12px;">
+            <a href="/admin/recipe/index" class="btn btn-secondary btn-sm">返回列表</a>
+            {if $recipe.status == 0}
+            <button class="btn btn-success btn-sm" onclick="reviewRecipe({$recipe.id}, 1)">审核通过</button>
+            <button class="btn btn-danger btn-sm" onclick="reviewRecipe({$recipe.id}, 2)">下架</button>
+            {elseif $recipe.status == 1}
+            <button class="btn btn-secondary btn-sm" onclick="toggleStatus({$recipe.id}, 2)">下架</button>
+            {else/}
+            <button class="btn btn-success btn-sm" onclick="toggleStatus({$recipe.id}, 1)">上架</button>
+            {/if}
+        </div>
+    </div>
+    <div class="card-body">
+        <div style="display: flex; gap: 40px; margin-bottom: 30px;">
+            <div style="width: 300px; flex-shrink: 0;">
+                {if $recipe.image}
+                <img src="{$recipe.image}" style="width: 100%; height: 200px; border-radius: 12px; object-fit: cover;">
+                {else/}
+                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #FFEAA7 0%, #FF6B6B 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 48px;">🍽️</span>
+                </div>
+                {/if}
+                
+                {if $recipe.images && count($recipe.images) > 0}
+                <div style="margin-top: 16px;">
+                    <div style="font-size: 14px; color: #666; margin-bottom: 10px;">更多图片：</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        {foreach $recipe.images as $img}
+                        <img src="{$img}" style="width: 80px; height: 60px; border-radius: 6px; object-fit: cover; cursor: pointer;" onclick="previewImage('{$img}')">
+                        {/foreach}
+                    </div>
+                </div>
+                {/if}
+            </div>
+            
+            <div style="flex: 1;">
+                <h2 style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 20px;">{$recipe.title}</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 13px; color: #999; margin-bottom: 6px;">作者</div>
+                        <div style="font-size: 15px; font-weight: 500; color: #333;">{$recipe.nickname|default='-'}</div>
+                    </div>
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 13px; color: #999; margin-bottom: 6px;">分类</div>
+                        <div style="font-size: 15px; font-weight: 500; color: #333;">
+                            {if $recipe.category_name}
+                            <span class="status-badge status-info">{$recipe.category_name}</span>
+                            {else/}
+                            <span>-</span>
+                            {/if}
+                        </div>
+                    </div>
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 8px;">
+                        <div style="font-size: 13px; color: #999; margin-bottom: 6px;">状态</div>
+                        <div style="font-size: 15px; font-weight: 500;">
+                            {if $recipe.status == 1}
+                            <span class="status-badge status-success">已发布</span>
+                            {elseif $recipe.status == 0}
+                            <span class="status-badge status-warning">待审核</span>
+                            {else/}
+                            <span class="status-badge status-danger">已下架</span>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px;">
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 13px; color: #999; margin-bottom: 6px;">浏览量</div>
+                        <div style="font-size: 20px; font-weight: bold; color: #FF6B6B;">{$recipe.view_count|default=0}</div>
+                    </div>
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 13px; color: #999; margin-bottom: 6px;">点赞数</div>
+                        <div style="font-size: 20px; font-weight: bold; color: #4ECDC4;">{$recipe.like_count|default=0}</div>
+                    </div>
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 13px; color: #999; margin-bottom: 6px;">收藏数</div>
+                        <div style="font-size: 20px; font-weight: bold; color: #FFD93D;">{$recipe.favorite_count|default=0}</div>
+                    </div>
+                    <div style="background: #F8FAFC; padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 13px; color: #999; margin-bottom: 6px;">难度</div>
+                        <div style="font-size: 20px; font-weight: bold; color: #45B7D1;">
+                            {if $recipe.difficulty == 1}简单
+                            {elseif $recipe.difficulty == 2}中等
+                            {elseif $recipe.difficulty == 3}困难
+                            {else/}未知
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+                
+                {if $recipe.cooking_time || $recipe.suitable_people}
+                <div style="display: flex; gap: 20px; margin-top: 16px;">
+                    {if $recipe.cooking_time}
+                    <div style="background: #F8FAFC; padding: 12px 20px; border-radius: 8px;">
+                        <span style="font-size: 13px; color: #999;">烹饪时间：</span>
+                        <span style="font-size: 14px; font-weight: 500; color: #333;">{$recipe.cooking_time}</span>
+                    </div>
+                    {/if}
+                    {if $recipe.suitable_people}
+                    <div style="background: #F8FAFC; padding: 12px 20px; border-radius: 8px;">
+                        <span style="font-size: 13px; color: #999;">适合人群：</span>
+                        <span style="font-size: 14px; font-weight: 500; color: #333;">{$recipe.suitable_people}</span>
+                    </div>
+                    {/if}
+                </div>
+                {/if}
+            </div>
+        </div>
+        
+        {if $recipe.description}
+        <div style="margin-bottom: 30px;">
+            <h3 style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #F0F0F0;">菜谱简介</h3>
+            <p style="font-size: 14px; color: #666; line-height: 1.8;">{$recipe.description}</p>
+        </div>
+        {/if}
+        
+        {if $recipe.materials && count($recipe.materials) > 0}
+        <div style="margin-bottom: 30px;">
+            <h3 style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #F0F0F0;">所需食材</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                {foreach $recipe.materials as $material}
+                <div style="background: linear-gradient(135deg, #FFF5F5 0%, #FFFFFF 100%); padding: 16px; border-radius: 8px; border-left: 4px solid #FF6B6B;">
+                    <div style="font-size: 14px; font-weight: 500; color: #333; margin-bottom: 4px;">{$material.name}</div>
+                    <div style="font-size: 13px; color: #999;">{$material.amount}</div>
+                </div>
+                {/foreach}
+            </div>
+        </div>
+        {/if}
+        
+        {if $recipe.steps && count($recipe.steps) > 0}
+        <div style="margin-bottom: 30px;">
+            <h3 style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #F0F0F0;">制作步骤</h3>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                {foreach $recipe.steps as $step}
+                <div style="display: flex; gap: 20px; padding: 20px; background: #F8FAFC; border-radius: 12px;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: bold; font-size: 16px; flex-shrink: 0;">
+                        {$step.order}
+                    </div>
+                    <div style="flex: 1; display: flex; gap: 20px;">
+                        {if $step.image}
+                        <img src="{$step.image}" style="width: 120px; height: 90px; border-radius: 8px; object-fit: cover; flex-shrink: 0;">
+                        {/if}
+                        <div style="flex: 1;">
+                            <p style="font-size: 14px; color: #333; line-height: 1.8; margin: 0;">{$step.desc}</p>
+                        </div>
+                    </div>
+                </div>
+                {/foreach}
+            </div>
+        </div>
+        {/if}
+        
+        {if $recipe.tips}
+        <div>
+            <h3 style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #F0F0F0;">小贴士</h3>
+            <div style="background: linear-gradient(135deg, #FFEAA720 0%, #FFFFFF 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #FFD93D;">
+                <p style="font-size: 14px; color: #666; line-height: 1.8; margin: 0;">💡 {$recipe.tips}</p>
+            </div>
+        </div>
+        {/if}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">发布信息</span>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <tr>
+                <th width="150">发布时间</th>
+                <td>{$recipe.create_time}</td>
+            </tr>
+            <tr>
+                <th>更新时间</th>
+                <td>{$recipe.update_time|default='-'}</td>
+            </tr>
+            <tr>
+                <th>每日推荐</th>
+                <td>
+                    {if $recipe.is_daily == 1}
+                    <span class="status-badge status-success">是</span>
+                    <button class="btn btn-secondary btn-sm" style="margin-left: 12px;" onclick="toggleDaily({$recipe.id}, 0)">取消推荐</button>
+                    {else/}
+                    <span class="status-badge status-info">否</span>
+                    <button class="btn btn-success btn-sm" style="margin-left: 12px;" onclick="toggleDaily({$recipe.id}, 1)">设为推荐</button>
+                    {/if}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+{include file="admin/public/footer" /}
+
+<script>
+    function previewImage(url) {
+        if (typeof wx !== 'undefined') {
+            wx.previewImage({
+                urls: [url]
+            });
+        } else {
+            window.open(url, '_blank');
+        }
+    }
+    
+    async function reviewRecipe(id, status) {
+        const action = status === 1 ? '审核通过' : '下架';
+        showConfirm('审核确认', `确定要${action}该菜谱吗？`, async function() {
+            try {
+                const response = await axios.post('/admin/recipe/updateStatus', {
+                    id: id,
+                    status: status
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '操作成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+    
+    async function toggleStatus(id, status) {
+        const action = status === 1 ? '上架' : '下架';
+        showConfirm('确认操作', `确定要${action}该菜谱吗？`, async function() {
+            try {
+                const response = await axios.post('/admin/recipe/updateStatus', {
+                    id: id,
+                    status: status
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '操作成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+    
+    async function toggleDaily(id, is_daily) {
+        const action = is_daily === 1 ? '设为每日推荐' : '取消每日推荐';
+        showConfirm('确认操作', `确定要${action}吗？`, async function() {
+            try {
+                const response = await axios.post('/admin/recipe/setDaily', {
+                    id: id,
+                    is_daily: is_daily
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '操作成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+</script>

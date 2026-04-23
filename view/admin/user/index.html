@@ -1,0 +1,163 @@
+{include file="admin/public/header" /}
+
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">用户管理</span>
+    </div>
+    <div class="card-body">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="搜索昵称/手机号" id="searchKeyword" value="{$keyword|default=''}">
+            <select class="search-select" id="searchStatus">
+                <option value="">全部状态</option>
+                <option value="1" {if $status == 1}selected{/if}>正常</option>
+                <option value="0" {if $status === '0' || $status === 0}selected{/if}>禁用</option>
+            </select>
+            <button class="btn btn-primary" onclick="searchUsers()">🔍 搜索</button>
+            <button class="btn btn-secondary" onclick="resetSearch()">🔄 重置</button>
+        </div>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th width="80">ID</th>
+                    <th width="80">头像</th>
+                    <th>昵称</th>
+                    <th width="150">手机号</th>
+                    <th width="100">菜谱数</th>
+                    <th width="100">收藏数</th>
+                    <th width="80">状态</th>
+                    <th width="120">注册时间</th>
+                    <th width="150">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $list as $user}
+                <tr>
+                    <td>{$user.id}</td>
+                    <td>
+                        {if $user.avatar}
+                        <img src="{$user.avatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        {else/}
+                        <div class="avatar">{$user.nickname|default='U'|mb_substr=0,1}</div>
+                        {/if}
+                    </td>
+                    <td>{$user.nickname|default='-'}</td>
+                    <td>{$user.phone|default='未绑定'}</td>
+                    <td>{$user.recipe_count|default=0}</td>
+                    <td>{$user.favorite_count|default=0}</td>
+                    <td>
+                        {if $user.status == 1}
+                        <span class="status-badge status-success">正常</span>
+                        {else/}
+                        <span class="status-badge status-danger">禁用</span>
+                        {/if}
+                    </td>
+                    <td>{$user.create_time}</td>
+                    <td>
+                        {if $user.status == 1}
+                        <button class="btn btn-secondary btn-sm" onclick="toggleStatus({$user.id}, 0)">禁用</button>
+                        {else/}
+                        <button class="btn btn-success btn-sm" onclick="toggleStatus({$user.id}, 1)">启用</button>
+                        {/if}
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser({$user.id})">删除</button>
+                    </td>
+                </tr>
+                {foreachelse}
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 60px;">
+                        <div class="empty-state">
+                            <span style="font-size: 48px; margin-bottom: 16px; display: block;">👥</span>
+                            <p>暂无用户数据</p>
+                        </div>
+                    </td>
+                </tr>
+                {/foreach}
+            </tbody>
+        </table>
+        
+        {if $total > 0}
+        <div class="pagination">
+            <span class="pagination-info">共 {$total} 条记录</span>
+            <a href="/admin/user/index?page={$page-1}&keyword={$keyword|default=''}&status={$status|default=''}" class="pagination-btn" {if $page <= 1}disabled{/if}>‹</a>
+            {for $i=1 to $total_page}
+            <a href="/admin/user/index?page={$i}&keyword={$keyword|default=''}&status={$status|default=''}" class="pagination-btn {if $page == $i}active{/if}">{$i}</a>
+            {/for}
+            <a href="/admin/user/index?page={$page+1}&keyword={$keyword|default=''}&status={$status|default=''}" class="pagination-btn" {if $page >= $total_page}disabled{/if}>›</a>
+        </div>
+        {/if}
+    </div>
+</div>
+
+{include file="admin/public/footer" /}
+
+<script>
+    function searchUsers() {
+        const keyword = document.getElementById('searchKeyword').value.trim();
+        const status = document.getElementById('searchStatus').value;
+        
+        let url = '/admin/user/index';
+        let params = [];
+        if (keyword) params.push('keyword=' + encodeURIComponent(keyword));
+        if (status !== '') params.push('status=' + status);
+        
+        if (params.length > 0) {
+            url += '?' + params.join('&');
+        }
+        
+        window.location.href = url;
+    }
+    
+    function resetSearch() {
+        window.location.href = '/admin/user/index';
+    }
+    
+    async function toggleStatus(id, status) {
+        const action = status === 1 ? '启用' : '禁用';
+        showConfirm('确认操作', `确定要${action}该用户吗？`, async function() {
+            try {
+                const response = await axios.post('/admin/user/updateStatus', {
+                    id: id,
+                    status: status
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '操作成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+    
+    async function deleteUser(id) {
+        showConfirm('删除确认', '确定要删除该用户吗？删除后无法恢复。', async function() {
+            try {
+                const response = await axios.post('/admin/user/delete', {
+                    id: id
+                });
+                
+                if (response.data.code === 200) {
+                    showToast(response.data.msg || '删除成功');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(response.data.msg || '删除失败', 'error');
+                }
+            } catch (error) {
+                showToast('网络错误', 'error');
+            }
+        });
+    }
+    
+    document.getElementById('searchKeyword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchUsers();
+        }
+    });
+</script>

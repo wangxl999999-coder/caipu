@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ThinkPHP 6.0
 ===============
 
@@ -54,3 +55,6 @@ All rights reserved。
 ThinkPHP® 商标和著作权所有者为上海顶想信息科技有限公司。
 
 更多细节参阅 [LICENSE.txt](LICENSE.txt)
+=======
+# caipu
+>>>>>>> 7ca37c752f68209288169159a525433818f8778a
